@@ -38,4 +38,11 @@ total_births = names.pivot_table('births', index='year', columns='sex', aggfunc=
 
 total_births.plot(title='Total number of births by gender and age')
 
+#100 Most Common Names
+def get_top100(group):
+    return group.sort_values(by='births', ascending=False)[:100]
+grouped = names.groupby(['year', 'sex'])
+top1000 = grouped.apply(get_top100)
+top1000.reset_index(inplace=True, drop=True)
+
 
