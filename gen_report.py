@@ -45,4 +45,66 @@ grouped = names.groupby(['year', 'sex'])
 top100 = grouped.apply(get_top100)
 top100.reset_index(inplace=True, drop=True)
  
+# Get last letter
+names['last_letter'] = names['name'].str[-1]
 
+
+table = names.pivot_table(
+    values='births',
+    index='last_letter',
+    columns=['sex', 'year'],
+    aggfunc='sum'
+)
+
+
+subtable = table.loc[:, (slice(None), [1990, 2000, 2010])]
+print(subtable.head())
+
+# Data normalization
+subtable_sum = subtable.sum()
+letter_prop = subtable.div(subtable_sum, axis=1)
+
+# Data visualization: popularity of last letters for Men and Women
+fig, axes = plt.subplots(2, 1, figsize=(10, 8))
+
+colors = ['royalblue', 'seagreen', 'gold']
+
+# for Man
+letter_prop['M'].plot(
+    kind='bar',
+    rot=0,
+    ax=axes[0],
+    title='Male',
+    color=colors,
+    legend=True
+)
+
+# for Woman
+letter_prop['F'].plot(
+    kind='bar',
+    rot=0,
+    ax=axes[1],
+    title='Female',
+    color=colors,
+    legend=True
+)
+
+plt.tight_layout()
+plt.show()
+
+letter_prop_full = table.div(table.sum(), axis=1)
+dny_ts = letter_prop_full.loc[['d', 'n', 'y'], 'M'].transpose()
+
+print(dny_ts.head())
+
+# Visualize changes over time
+dny_ts.plot(
+    figsize=(10, 6),
+    title="Proportion of Names Ending in 'd', 'n', and 'y' (Male)",
+    linewidth=2
+)
+plt.xlabel('Year')
+plt.ylabel('Proportion')
+plt.legend(title="Last Letter")
+plt.grid()
+plt.show()
