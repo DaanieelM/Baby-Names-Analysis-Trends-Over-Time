@@ -44,5 +44,5 @@ def get_top100(group):
 grouped = names.groupby(['year', 'sex'])
 top100 = grouped.apply(get_top100)
 top100.reset_index(inplace=True, drop=True)
-
+ 
 
