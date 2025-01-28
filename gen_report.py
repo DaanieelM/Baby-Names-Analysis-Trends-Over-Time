@@ -4,23 +4,23 @@ import matplotlib.pyplot as plt
 import os
 
 # Open the first 10 lines of a file to preview its content
-file_path = 'data/babynames/yob1882.txt'
+file_path = 'data/babynames/yob1992.txt'
 with open(file_path, 'r') as file:
     for i in range(10):
         print(file.readline().strip())
 
-# Read the 1882 dataset and display its content
-names1882 = pd.read_csv(file_path, names=['name', 'sex', 'births'])
-print("\nPreview of 1882 data:")
-print(names1882.head())
+# Read the 1992 dataset and display its content
+names1992 = pd.read_csv(file_path, names=['name', 'sex', 'births'])
+print("\nPreview of 1992 data:")
+print(names1992.head())
 
-# Calculate total births grouped by gender for 1882
-total_births_1882 = names1882.groupby('sex').births.sum()
-print("\nTotal births by gender in 1882:")
-print(total_births_1882)
+# Calculate total births grouped by gender for 1992
+total_births_1992 = names1992.groupby('sex').births.sum()
+print("\nTotal births by gender in 1992:")
+print(total_births_1992)
 
 # Process data from all years and combine it into a single DataFrame
-years = range(1880, 2023)  # Range of years
+years = range(1990, 2020)  # Range of years
 pieces = []  # List to store data
 columns = ['name', 'sex', 'births']
 
@@ -56,8 +56,8 @@ def get_top100(group):
 grouped = names.groupby(['year', 'sex'])
 top100 = grouped.apply(get_top100).reset_index(drop=True)
 
-print("\nTop 100 names for a sample year (e.g., 1882):")
-print(top100[top100['year'] == 1882].head())
+print("\nTop 100 names for a sample year (e.g., 1992):")
+print(top100[top100['year'] == 1992].head())
 
 # Analyze the popularity of last letters in names
 names['last_letter'] = names['name'].str[-1]  # Extract last letter
