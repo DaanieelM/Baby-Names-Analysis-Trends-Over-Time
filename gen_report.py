@@ -3,21 +3,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-#Opening the first 10 lines
-with open('data/babynames/yob1882.txt', 'r') as file:
+# Open the first 10 lines of a file to preview its content
+file_path = 'data/babynames/yob1882.txt'
+with open(file_path, 'r') as file:
     for i in range(10):
         print(file.readline().strip())
 
-names1882 = pd.read_csv('data/babynames/yob1882.txt', names=['name', 'sex', 'births'])
+# Read the 1882 dataset and display its content
+names1882 = pd.read_csv(file_path, names=['name', 'sex', 'births'])
+print("\nPreview of 1882 data:")
+print(names1882.head())
 
-names1882
+# Calculate total births grouped by gender for 1882
+total_births_1882 = names1882.groupby('sex').births.sum()
+print("\nTotal births by gender in 1882:")
+print(total_births_1882)
 
-names1882.groupby('sex').births.sum()
-
+# Process data from all years and combine it into a single DataFrame
 years = range(1880, 2023)  # Range of years
 pieces = []  # List to store data
-columns = ['name', 'sex', 'births', 'year']
+columns = ['name', 'sex', 'births']
 
+print("\nProcessing data for all years...")
 for year in years:
     path = f'data/babynames/yob{year}.txt'
     if os.path.exists(path):  # Check if the file exists
@@ -27,28 +34,35 @@ for year in years:
     else:
         print(f'File does not exist for year: {year}')
 
-# Concatenate all pieces into one table
+# Combine all yearly data into one DataFrame
 names = pd.concat(pieces, ignore_index=True)
+print("\nCombined data preview:")
+print(names.head())
 
-print(names.head())  # Preview the first rows
-
-names['year']
-
+# Create a pivot table showing total births by gender and year
 total_births = names.pivot_table('births', index='year', columns='sex', aggfunc='sum')
 
-total_births.plot(title='Total number of births by gender and age')
+# Plot the total number of births over time
+total_births.plot(title='Total Number of Births by Gender')
+plt.xlabel('Year')
+plt.ylabel('Number of Births')
+plt.grid()
+plt.show()
 
-#100 Most Common Names
+# Identify the 100 most common names for each year and gender
 def get_top100(group):
     return group.sort_values(by='births', ascending=False)[:100]
+
 grouped = names.groupby(['year', 'sex'])
-top100 = grouped.apply(get_top100)
-top100.reset_index(inplace=True, drop=True)
- 
-# Get last letter
-names['last_letter'] = names['name'].str[-1]
+top100 = grouped.apply(get_top100).reset_index(drop=True)
 
+print("\nTop 100 names for a sample year (e.g., 1882):")
+print(top100[top100['year'] == 1882].head())
 
+# Analyze the popularity of last letters in names
+names['last_letter'] = names['name'].str[-1]  # Extract last letter
+
+# Pivot table for last letters
 table = names.pivot_table(
     values='births',
     index='last_letter',
@@ -56,51 +70,52 @@ table = names.pivot_table(
     aggfunc='sum'
 )
 
-
+# Filter data for specific years
 subtable = table.loc[:, (slice(None), [1990, 2000, 2010])]
+print("\nLast letter data for 1990, 2000, and 2010:")
 print(subtable.head())
 
-# Data normalization
+# Normalize data to calculate proportions
 subtable_sum = subtable.sum()
 letter_prop = subtable.div(subtable_sum, axis=1)
 
-# Data visualization: popularity of last letters for Men and Women
+# Plot the popularity of last letters for males and females
 fig, axes = plt.subplots(2, 1, figsize=(10, 8))
 
-colors = ['royalblue', 'seagreen', 'gold']
+colors = ['royalblue', 'seagreen', 'gold']  # Colors for different years
 
-# for Man
+# Male last letter proportions
 letter_prop['M'].plot(
     kind='bar',
     rot=0,
     ax=axes[0],
-    title='Male',
-    color=colors,
-    legend=True
+    title='Male Last Letter Proportions (1990, 2000, 2010)',
+    color=colors
 )
 
-# for Woman
+# Female last letter proportions
 letter_prop['F'].plot(
     kind='bar',
     rot=0,
     ax=axes[1],
-    title='Female',
-    color=colors,
-    legend=True
+    title='Female Last Letter Proportions (1990, 2000, 2010)',
+    color=colors
 )
 
 plt.tight_layout()
 plt.show()
 
-letter_prop_full = table.div(table.sum(), axis=1)
+# Track popularity of last letters 'd', 'n', and 'y' for males over time
+letter_prop_full = table.div(table.sum(), axis=1)  # Normalize full table
 dny_ts = letter_prop_full.loc[['d', 'n', 'y'], 'M'].transpose()
 
+print("\nProportions of names ending with 'd', 'n', and 'y' (male) over time:")
 print(dny_ts.head())
 
-# Visualize changes over time
+# Plot changes over time
 dny_ts.plot(
     figsize=(10, 6),
-    title="Proportion of Names Ending in 'd', 'n', and 'y' (Male)",
+    title="Proportion of Male Names Ending in 'd', 'n', and 'y' Over Time",
     linewidth=2
 )
 plt.xlabel('Year')
